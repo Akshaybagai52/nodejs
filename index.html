@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Todo App</h1>
+    <div>
+      <label>title: <input type="text" id="text-input" /></label>
+      <label>Description: <input type="text" id="desc-input" /></label>
+      <button type="submit" onclick="submitFn()">Submit</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Title</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody id="input-data"></tbody>
+    </table>
+
+    <script>
+      const deleteFn = (id) => {
+  fetch("http://localhost:3000/todos/" + id, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      let row = document.querySelector(`[data-id="${id}"]`)
+      row ? row.remove() : alert("row is not found")
+    })
+};
+
+let tableBody = document.getElementById("input-data");
+const getData = () => {
+  return fetch("http://localhost:3000/todos")
+    .then((res) => res.json())
+    .catch(() => {
+      console.error("Error in fetching data");
+    });
+};
+getData()
+  .then((data) => {
+    data.map((item) => {
+      let newRow = document.createElement("tr");
+      newRow.setAttribute("data-id", item.id);
+      newRow.innerHTML = `
+        <td>${item.id}</td>
+        <td>${item.title}</td>
+        <td>${item.description}</td>
+        <td><button onclick="deleteFn(${item.id})">Delete</button></td>
+      `;
+      tableBody.appendChild(newRow);
+    });
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });
+
+let submitFn = (e) => {
+  let textIn = document.getElementById("text-input").value;
+  let descIn = document.getElementById("desc-input").value;
+  console.log(textIn);
+  fetch("http://localhost:3000/todos", {
+    method: "POST",
+    body: JSON.stringify({
+      title: textIn,
+      description: descIn,
+    }),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+    },
+  })
+    .then((response) => response.json())
+    .then((json) => {
+      let newRow = document.createElement("tr");
+      newRow.setAttribute("data-id", json.id);
+      newRow.innerHTML = `
+        <td>${json.id}</td>
+        <td>${json.title}</td>
+        <td>${json.description}</td>
+        <td><button onclick="deleteFn(${json.id})">Delete</button></td>
+      `;
+      tableBody.appendChild(newRow);
+      textIn = ""; // Update here
+      descIn = ""; // Update here
+    });
+};
+
+    </script>
+  </body>
+</html>
