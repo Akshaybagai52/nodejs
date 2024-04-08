@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const app = express();
+app.use(express.json());
+
 
 interface User {
   username: string;
@@ -12,6 +14,7 @@ interface User {
 let users: User[] = [];
 
 app.post('/register', async (req:Request, res:Response) => {
+    console.log(req.body, "req")
     const {username, password} = req.body
     const existingUser = users.find(user => user.username === username)
     if(existingUser) return res.status(400).json({message: "user already exists"})
@@ -21,6 +24,7 @@ app.post('/register', async (req:Request, res:Response) => {
         password: hashedPassword
     }
     users.push(user)
+    return res.status(400).json({message: "user inserted successfully"})
 })
 
 app.listen(3000, () => {
